@@ -1,0 +1,10 @@
+/* fitment page */
+.fitment-page {
+position: relative;
+width: 365px;
+height: 450px;
+overflow-y: scroll;
+
+background: #FAFAFA;
+box-shadow: 4px 4px 9px rgba(0, 0, 0, 0.35);
+}
