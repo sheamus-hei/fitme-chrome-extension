@@ -1,10 +1,20 @@
+#header {
+    font-family: Pacifico;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 26px;
+    line-height: 46px;
+    text-align: center;
+    color: #626262;
+}
+
 /* fitment page */
 .fitment-page {
-position: relative;
-width: 365px;
-height: 450px;
-overflow-y: scroll;
+    position: relative;
+    width: 365px;
+    height: 450px;
+    overflow-y: scroll;
 
-background: #FAFAFA;
-box-shadow: 4px 4px 9px rgba(0, 0, 0, 0.35);
+    background: #FAFAFA;
+    box-shadow: 4px 4px 9px rgba(0, 0, 0, 0.35);
 }
