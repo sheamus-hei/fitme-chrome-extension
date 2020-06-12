@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     `<form>
     <input type="text" name="add-keyword" id="add-keyword" placeholder="Type in keyword(s)">
     <input type="button" value="Add" id="add-keyword-button">
-</form>`
+    </form>`
   )
 
   class Preferences {
@@ -90,22 +90,21 @@ document.addEventListener("DOMContentLoaded", function(event) {
     HasStorage() {
       return (typeof(Storage) !== "undefined") ? true : false;
     }
+    
     get customPreferences() {
-
       return JSON.parse(localStorage.customPreferences)
     }
+    
     get customPreferencesAsForm() {
       return (this.customPreferences !== null) ? this.customPreferences.map(x => 
-        `<input type="checkbox" id="${x.name}" name="${x.name}" value="${x.name}">
-  <label for="${x.name}"> ${x.name}</label>`
+        `<input type="checkbox" id="${x.name}" name="${x.name}" value="${x.name}"><label for="${x.name}"> ${x.name}</label>`
         ) : null
     }
-
   }
-      class PreferencesItem {
-        constructor(activ, name) {
-          this.activ = activ
-          this.name = name
-        }
 
-      }
+  class PreferencesItem {
+    constructor(activ, name) {
+      this.activ = activ
+      this.name = name
+    }
+  }
