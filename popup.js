@@ -1,4 +1,18 @@
-let navActive, navFitment, navPreferences, navProfile, content, currentPreferences
+let profile = {
+  size: "M",
+  heightFt: "0",
+  heightIn: "0",
+  heightCm: "0",
+  weightLbs: "0",
+  weightKgs: "0",
+  waistIn: "0",
+  waistCm: "0",
+  fit: "slim",
+  starRating: "4"
+}
+
+
+let navActive, navFitment, navPreferences, navProfile, content, currentPreferences;
 document.addEventListener("DOMContentLoaded", function(event) {
   console.log("Some message log")
     navActive = document.querySelector(".nav-active");
@@ -13,6 +27,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     navProfile.addEventListener("click", NavProfileOnClick)
 
     currentPreferences = new Preferences()
+
   });
 
   function  NavFitmentOnClick() {
@@ -42,58 +57,98 @@ document.addEventListener("DOMContentLoaded", function(event) {
     let keyword = document.querySelector("#add-keyword").value
     console.log(keyword)
     currentPreferences.AddItem(new PreferencesItem(false, keyword))
-    
   }
-  function  NavProfileOnClick() {
+  
+  function setProfileDisplay() {
+    let starRating = "";
+    for (let i = 0; i < parseInt(profile.starRating); i++) {
+      starRating = starRating + "★"
+    }
+    let profileContent =`<div class="profile">
+    <h3>Profile</h3>
+    <p>Size: ${profile.size}</p>
+    <p>Height: ${profile.heightFt}'${profile.heightIn}" or ${profile.heightCm} cm</p>
+    <p>Weight: ${profile.weightLbs} lbs or ${profile.weightKgs} kg</p>
+    <p>Waist: ${profile.waistIn}" or ${profile.waistCm} cm </p>
+    <p>Fit: ${profile.fit}</p>
+    <p>Min. Star Rating: ${starRating}</p>
+    <button id="edit-profile">Edit Profile</button>
+</div>`;
+    content.innerHTML = profileContent;
+    editProfile = document.getElementById("edit-profile");
+    editProfile.addEventListener("click", EditProfileOnClick);
+  }
+
+  function NavProfileOnClick() {
     navActive.classList.remove("nav-active")
     navProfile.classList.add("nav-active")
     navActive = navProfile
+    setProfileDisplay();
+  }
+
+  function EditProfileOnClick() {
     content.innerHTML = `<div class="profile">
     <h3>Profile</h3>
-    <form>
+    <form id="profile-form">
         <div>
             <label>Size:</label>
-            <select name="size">
-                <option value="xs">xs</option>
-                <option value="s">s</option>
-                <option value="m">m</option>
-                <option value="l">l</option>
-                <option value="xl">xl</option>
-                <option value="xxl">xxl</option>
+            <select name="size" class="profile-field">
+                <option ${profile.size == "XS" ? "selected":""} value="XS">XS</option>
+                <option ${profile.size == "S" ? "selected":""} value="S">S</option>
+                <option ${profile.size == "M" ? "selected":""} value="M">M</option>
+                <option ${profile.size == "L" ? "selected":""} value="L">L</option>
+                <option ${profile.size == "XL" ? "selected":""} value="XL">XL</option>
+                <option ${profile.size == "XXL"? "selected":""} value="XXL">XXL</option>
             </select>
         </div>
         <div>
             <label>Height:</label>
-            <input type="number" value="0" name="heightFt">'<input type="number" name="heightIn" value="0">" or <input type="number" name="heightCm" value="0">cm
+            <input type="number" value=${profile.heightFt} name="heightFt" class="profile-field">'
+            <input type="number" name="heightIn" value=${profile.heightIn} class="profile-field">" or <input type="number" name="heightCm" value=${profile.heightCm}  class="profile-field">cm
         </div>
         <div>
             <label>Weight:</label>
-            <input type="number" name="weightLbs" value="0">lbs or <input type="number" name="weightKgs" value="0">kgs
+            <input type="number" name="weightLbs" value=${profile.weightLbs} class="profile-field">lbs or 
+            <input type="number" name="weightKgs" value=${profile.weightKgs} class="profile-field">kgs
         </div>
         <div>
             <label>Waist:</label>
-            <input type="number" name="waistIn" value="0">" or <input type="number" name="waistCm" value="0">cm
+            <input type="number" name="waistIn" value=${profile.waistIn} class="profile-field">" or 
+            <input type="number" name="waistCm" value=${profile.waistCm} class="profile-field">cm
         </div>
         <div>
             <label>Fit:</label>
-            <select name="size">
-                <option value="slim">slim</option>
-                <option value="fitted">fitted</option>
-                <option value="loose">loose</option>
+            <select name="fit" class="profile-field">
+                <option ${profile.fit == "slim" ? "selected":""} value="slim">slim</option>
+                <option ${profile.fit == "fitted" ? "selected":""} value="fitted">fitted</option>
+                <option ${profile.fit == "loose" ? "selected":""} value="loose">loose</option>
             </select>
         </div>
         <div>
             <label>Min. Star Rating:</label>
-            <select name="size">
-                <option value="oneStar">★</option>
-                <option value="twoStar">★★</option>
-                <option value="threeStar">★★★</option>
-                <option value="fourStar">★★★★</option>
-                <option value="fiveStar">★★★★★</option>
+            <select name="starRating" class="profile-field">
+                <option ${profile.starRating == "1" ? "selected":""} value="1">★</option>
+                <option ${profile.starRating == "2" ? "selected":""} value="2">★★</option>
+                <option ${profile.starRating == "3" ? "selected":""} value="3">★★★</option>
+                <option ${profile.starRating == "4" ? "selected":""} value="4">★★★★</option>
+                <option ${profile.starRating == "5" ? "selected":""} value="5">★★★★★</option>
             </select>
+          <br />
+          <input type="submit" value="Save changes">
         </div>
     </form>
 </div>`
+    let profileForm = document.getElementById("profile-form");
+    profileForm.addEventListener("submit", e => ProfileHandleSubmit(e));
+  }
+
+  function ProfileHandleSubmit(e) {
+    e.preventDefault();
+    profileFields = document.querySelectorAll(".profile-field")
+    profileFields.forEach(field => {
+      profile[field.name] = field.value;
+    })
+    setProfileDisplay();
   }
 
   let preferences_add_form = (
