@@ -16,6 +16,10 @@
     font-weight: normal;
     font-size: 18px;
     line-height: 25px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    padding: 15px 0;
 }
 
 .nav-item {
@@ -25,6 +29,12 @@
 .nav-item.nav-active {
     color: #626262;
 }
+
+/* content */
+#content {
+    padding: 10px;
+}
+
 /* fitment page */
 .fitment-page {
     position: relative;
