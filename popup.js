@@ -34,29 +34,45 @@ document.addEventListener("DOMContentLoaded", function(event) {
     navActive.classList.remove("nav-active")
     navFitment.classList.add("nav-active")
     navActive = navFitment
-    content.innerHTML = `<b>Fitment<b>`
+    content.innerHTML = `<h3>Fitment</h3>`
   }
 
   function  NavPreferencesOnClick() {
     navActive.classList.remove("nav-active")
     navPreferences.classList.add("nav-active")
     navActive = navPreferences
-    PopulatePreferencesView()
     console.log(currentPreferences.customPreferences)
     console.log(localStorage)
+    PopulatePreferencesView()
   }
 
   function PopulatePreferencesView() {
-    content.innerHTML = `<b>Preferences<b>`
-    content.innerHTML += currentPreferences.customPreferencesAsForm
-    content.innerHTML += preferences_add_form
-    document.querySelector('#add-keyword-button').addEventListener("click",AddKeyword);
+    LoadPreferences().then(() => {
+      let preferencesForm = currentPreferences.customPreferencesAsForm
+      preferencesForm.forEach(element => {
+        content.innerHTML += element
+      });
+      content.innerHTML += preferences_add_form
+      document.querySelector('#add-keyword-button').addEventListener("click",AddKeyword);
+      let preferencesHTLM = document.querySelectorAll('input[type="checkbox"]')
+      preferencesHTLM.forEach(element => {
+        element.addEventListener('change', ToggleActiv)
+      })
+    })
+  }
+
+  function ToggleActiv(element) {
+    currentPreferences.customPreferences.find((p, i) => {
+      if (p.name === element.target.name) {
+        currentPreferences.ChangeItems(i)
+          return true;
+      }
+    });
   }
 
   function AddKeyword() {
     let keyword = document.querySelector("#add-keyword").value
-    console.log(keyword)
-    currentPreferences.AddItem(new PreferencesItem(false, keyword))
+    currentPreferences.AddItem(new PreferencesItem(true, keyword))
   }
   
   function setProfileDisplay() {
@@ -162,13 +178,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
     constructor() {
       if (this.HasStorage()) {
         console.log("There's storage")
-        // let myArray = []
-        // myArray.push(new PreferencesItem(false, `Cotton`))
-        // myArray.push(new PreferencesItem(false, `Long`))
-        // myArray.push(new PreferencesItem(false, `Short`))
-        // console.log(myArray)
-        //localStorage.customPreferences = JSON.stringify(myArray)
-        //this.ResetValues()
       }
       else {
         console.log("There's no storage")
@@ -190,6 +199,13 @@ document.addEventListener("DOMContentLoaded", function(event) {
     HasStorage() {
       return (typeof(Storage) !== "undefined") ? true : false;
     }
+
+    ChangeItems(index) {
+      console.log(`Changing ${index}`)
+      let items = (this.customPreferences !== null) ? this.customPreferences : []
+      items[index].activ = !items[index].activ
+      localStorage.customPreferences = JSON.stringify(items)
+    }
     
     get customPreferences() {
       return JSON.parse(localStorage.customPreferences)
@@ -197,8 +213,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
     
     get customPreferencesAsForm() {
       return (this.customPreferences !== null) ? this.customPreferences.map(x => 
-        `<input type="checkbox" id="${x.name}" name="${x.name}" value="${x.name}"><label for="${x.name}"> ${x.name}</label>`
+        `<span class="preference"><input type="checkbox" id="${x.name}" name="${x.name}" value="${x.name}" ${(x.activ) ? "checked" : ""}><label for="${x.name}"> ${x.name}</label></span>`
         ) : null
+
+
     }
   }
 
@@ -207,4 +225,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
       this.activ = activ
       this.name = name
     }
+  }
+
+  async function LoadPreferences() {
+    let url = 'preferences.html'
+  
+    content.innerHTML = await (await fetch(url)).text();
   }
