@@ -126,3 +126,12 @@ body {
   .spacer {
       display: block;
   }
+
+  .hide {
+    display: none;
+  }
+      
+  .preference:hover > .hide {
+    display: inline;
+    color: red;
+  }
