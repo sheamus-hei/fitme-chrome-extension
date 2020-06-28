@@ -14,7 +14,6 @@ let profile = {
 
 let navActive, navFitment, navPreferences, navProfile, content, currentPreferences;
 document.addEventListener("DOMContentLoaded", function(event) {
-  console.log("Some message log")
     navActive = document.querySelector(".nav-active");
     navFitment = document.querySelector("#nav-fitment");
     navPreferences = document.querySelector("#nav-preferences");
@@ -34,7 +33,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     navActive.classList.remove("nav-active")
     navFitment.classList.add("nav-active")
     navActive = navFitment
-    content.innerHTML = `<b>Fitment<b>`
+    content.innerHTML = `<h3>Fitment</h3>`
   }
 
   function  NavPreferencesOnClick() {
@@ -42,21 +41,58 @@ document.addEventListener("DOMContentLoaded", function(event) {
     navPreferences.classList.add("nav-active")
     navActive = navPreferences
     PopulatePreferencesView()
-    console.log(currentPreferences.customPreferences)
-    console.log(localStorage)
   }
 
   function PopulatePreferencesView() {
-    content.innerHTML = `<b>Preferences<b>`
-    content.innerHTML += currentPreferences.customPreferencesAsForm
-    content.innerHTML += preferences_add_form
-    document.querySelector('#add-keyword-button').addEventListener("click",AddKeyword);
+    LoadPreferences().then(() => {
+      let preferencesForm = currentPreferences.customPreferencesAsForm
+      preferencesForm.forEach(element => {
+        content.innerHTML += element
+      });
+      content.innerHTML += preferences_add_form
+      document.querySelector('#preferences-add-form').addEventListener("submit", (e) => { 
+        e.preventDefault() 
+        AddKeyword(e)
+        //return false
+      })
+      document.querySelector('#add-keyword-button').addEventListener("click", e => AddKeyword(e));
+      let preferencesHTLM = document.querySelectorAll('input[type="checkbox"]')
+      preferencesHTLM.forEach(element => {
+        element.addEventListener('change', ToggleActiv)
+      })
+
+      // Add click listener to remove button
+      preferencesHTML = document.querySelectorAll('input[type="button"]')
+      preferencesHTML.forEach(element => {
+        element.addEventListener('click', RemovePreference)
+      })
+
+    })
   }
 
-  function AddKeyword() {
+  function ToggleActiv(element) {
+    currentPreferences.customPreferences.find((p, i) => {
+      if (p.name === element.target.name) {
+        currentPreferences.ChangeItems(i)
+          return true;
+      }
+    });
+  }
+
+  function RemovePreference(element) {
+    currentPreferences.customPreferences.find((p, i) => {
+      if (p.name === element.target.name) {
+        currentPreferences.RemoveItem(i)
+        element.target.parentElement.parentElement.remove()
+          return true;
+      }
+    });
+  }
+
+  function AddKeyword(e) {
+    e.preventDefault()
     let keyword = document.querySelector("#add-keyword").value
-    console.log(keyword)
-    currentPreferences.AddItem(new PreferencesItem(false, keyword))
+    currentPreferences.AddItem(new PreferencesItem(true, keyword))
   }
   
   function setProfileDisplay() {
@@ -152,7 +188,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   }
 
   let preferences_add_form = (
-    `<form>
+    `<form id="preferences-add-form">
     <input type="text" name="add-keyword" id="add-keyword" placeholder="Type in keyword(s)">
     <input type="button" value="Add" id="add-keyword-button">
     </form>`
@@ -160,27 +196,22 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   class Preferences {
     constructor() {
-      if (this.HasStorage()) {
-        console.log("There's storage")
-        // let myArray = []
-        // myArray.push(new PreferencesItem(false, `Cotton`))
-        // myArray.push(new PreferencesItem(false, `Long`))
-        // myArray.push(new PreferencesItem(false, `Short`))
-        // console.log(myArray)
-        //localStorage.customPreferences = JSON.stringify(myArray)
-        //this.ResetValues()
-      }
-      else {
-        console.log("There's no storage")
-      }
+      // if (this.HasStorage()) {
+      //   // console.log("There's storage")
+      // }
+      // else {
+      //   // console.log("There's no storage")
+      // }
     }
 
     AddItem(newItem) {
       let items = (this.customPreferences !== null) ? this.customPreferences : []
-      items.push(newItem);
-      console.log(items)
-      localStorage.customPreferences = JSON.stringify(items)
-      PopulatePreferencesView()
+
+      if (items.filter(item => item.name === newItem.name).length === 0) {
+        items.push(newItem);
+        this.Save(items)
+        PopulatePreferencesView()
+      }
     }
 
     ResetValues() {
@@ -190,6 +221,22 @@ document.addEventListener("DOMContentLoaded", function(event) {
     HasStorage() {
       return (typeof(Storage) !== "undefined") ? true : false;
     }
+
+    ChangeItems(index) {
+      let items = (this.customPreferences !== null) ? this.customPreferences : []
+      items[index].activ = !items[index].activ
+      this.Save(items)
+    }
+
+    RemoveItem(index) {
+      let items = (this.customPreferences !== null) ? this.customPreferences : []
+      items.splice(index,1)
+      this.Save(items)
+    }
+
+    Save(items) {
+      localStorage.customPreferences = JSON.stringify(items)
+    }
     
     get customPreferences() {
       return JSON.parse(localStorage.customPreferences)
@@ -197,7 +244,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     
     get customPreferencesAsForm() {
       return (this.customPreferences !== null) ? this.customPreferences.map(x => 
-        `<input type="checkbox" id="${x.name}" name="${x.name}" value="${x.name}"><label for="${x.name}"> ${x.name}</label>`
+        `<span class="preference"><input type="checkbox" id="${x.name}" name="${x.name}" value="${x.name}" ${(x.activ) ? "checked" : ""}><label for="${x.name}"> ${x.name}</label><span class="hide"><input type="button" name="${x.name}" value="remove" class="remove-preference-button" /></span></span>`
         ) : null
     }
   }
@@ -207,4 +254,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
       this.activ = activ
       this.name = name
     }
+  }
+
+  async function LoadPreferences() {
+    let url = 'preferences.html'
+    content.innerHTML = await (await fetch(url)).text();
   }
